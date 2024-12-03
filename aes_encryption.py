@@ -1,7 +1,3 @@
-
-# File made by Ansh Gupta 2018317
-# Code used from : https://jhafranco.com/2012/02/11/simplified-aes-implementation-in-python/
-
 import socket
 import sys
 import json

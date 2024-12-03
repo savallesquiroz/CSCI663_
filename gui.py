@@ -1,4 +1,6 @@
+import sys
 import tkinter as tk
+import queue
 from tkinter import scrolledtext, messagebox
 
 class CryptoGUI:
@@ -24,54 +26,42 @@ class CryptoGUI:
         )
         self.message_area.pack(padx=10, pady=5, fill="both")
 
-        # Input text for messages
-        self.input_label = tk.Label(
-            root, text="Enter your message:", font=("Helvetica", 12), fg="#ECF0F1", bg="#2C3E50"
-        )
-        self.input_label.pack(anchor="w", padx=10)
-        self.message_entry = tk.Entry(root, width=40, font=("Helvetica", 12), bg="#34495E", fg="#ECF0F1")
-        self.message_entry.pack(padx=10, pady=5)
+        # Message Queue 
+        self.message_queue = queue.Queue()
 
         # Buttons Frame
         self.button_frame = tk.Frame(root, bg="#2C3E50")
         self.button_frame.pack(pady=10)
 
-        self.encrypt_button = tk.Button(
-            self.button_frame, text="Encrypt", command=self.encrypt_message,
-            bg="#1ABC9C", fg="#ECF0F1", font=("Helvetica", 12), width=12
-        )
-        self.encrypt_button.grid(row=0, column=0, padx=5)
+        if sys.argv[1] == "client":
+            # Input text for messages
+            self.input_label = tk.Label(
+                root, text="Enter your message:", font=("Helvetica", 12), fg="#ECF0F1", bg="#2C3E50"
+            )
+            self.input_label.pack(anchor="w", padx=10)
+            self.message_entry = tk.Entry(root, width=40, font=("Helvetica", 12), bg="#34495E", fg="#ECF0F1")
+            self.message_entry.pack(padx=10, pady=5)
 
-        self.decrypt_button = tk.Button(
-            self.button_frame, text="Decrypt", command=self.decrypt_message,
-            bg="#E74C3C", fg="#ECF0F1", font=("Helvetica", 12), width=12
-        )
-        self.decrypt_button.grid(row=0, column=1, padx=5)
+            self.encrypt_button = tk.Button(
+                self.button_frame, text="Encrypt", command=self.message_queue.put(self.message_entry.get()),
+                bg="#1ABC9C", fg="#ECF0F1", font=("Helvetica", 12), width=12
+            )
+            self.encrypt_button.grid(row=0, column=0, padx=5)
+        elif sys.argv[1] == "server":
+            self.decrypt_button = tk.Button(
+                self.button_frame, text="Decrypt", command=self.send_message,
+                bg="#E74C3C", fg="#ECF0F1", font=("Helvetica", 12), width=12
+            )
+            self.decrypt_button.grid(row=0, column=1, padx=5)
+        else:
+            pass
 
-    def encrypt_message(self):
-        message = self.message_entry.get()
+    def send_message(self, message):
         if not message:
             messagebox.showwarning("Warning", "Please enter a message.")
             return
-        encrypted_message = f"ENCRYPTED({message})"  # Simulated encryption
         self.message_area.config(state='normal')
-        self.message_area.insert(tk.END, f"Encrypted: {encrypted_message}\n")
+        self.message_area.insert(tk.END, f"{message}\n")
         self.message_area.config(state='disabled')
-        self.message_entry.delete(0, tk.END)
-
-    def decrypt_message(self):
-        message = self.message_entry.get()
-        if not message:
-            messagebox.showwarning("Warning", "Please enter a message.")
-            return
-        decrypted_message = f"DECRYPTED({message})"  # Simulated decryption
-        self.message_area.config(state='normal')
-        self.message_area.insert(tk.END, f"Decrypted: {decrypted_message}\n")
-        self.message_area.config(state='disabled')
-        self.message_entry.delete(0, tk.END)
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = CryptoGUI(root)
-    root.mainloop()
+        if sys.argv[1] == "client":
+            self.message_entry.delete(0, tk.END)
