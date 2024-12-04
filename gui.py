@@ -43,13 +43,13 @@ class CryptoGUI:
             self.message_entry.pack(padx=10, pady=5)
 
             self.encrypt_button = tk.Button(
-                self.button_frame, text="Encrypt", command=self.message_queue.put(self.message_entry.get()),
+                self.button_frame, text="Encrypt", command=self.encrypt_message(),
                 bg="#1ABC9C", fg="#ECF0F1", font=("Helvetica", 12), width=12
             )
             self.encrypt_button.grid(row=0, column=0, padx=5)
         elif sys.argv[1] == "server":
             self.decrypt_button = tk.Button(
-                self.button_frame, text="Decrypt", command=self.send_message,
+                self.button_frame, text="Decrypt", command=self.decrypt_message(),
                 bg="#E74C3C", fg="#ECF0F1", font=("Helvetica", 12), width=12
             )
             self.decrypt_button.grid(row=0, column=1, padx=5)
@@ -65,3 +65,12 @@ class CryptoGUI:
         self.message_area.config(state='disabled')
         if sys.argv[1] == "client":
             self.message_entry.delete(0, tk.END)
+
+    def encrypt_message(self):
+        message = self.message_entry.get()
+        self.message_queue.put(message)
+        if sys.argv[1] == "client":
+            self.message_entry.delete(0, tk.END)
+
+    def decrypt_message(self):
+        message = self.message_queue.get(0) if not self.message_queue.empty() else None

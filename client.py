@@ -3,11 +3,11 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 import binascii
 import gui
+import threading
 
 # Server Configuration
 HOST = '127.0.0.1'
 PORT = 65432
-
 
 def start_client(app):
     try:
@@ -21,7 +21,7 @@ def start_client(app):
             app.send_message("Received server's public key.")
 
             # Encrypt the message using the server's public key
-            message = app.message_queue.get().encode()
+            message = app.message_queue.get(0).encode()
             encryptor = PKCS1_OAEP.new(server_public_key)
             encrypted_message = encryptor.encrypt(message)
             app.send_message(f"Encrypted message:{binascii.hexlify(encrypted_message)}")
@@ -31,7 +31,3 @@ def start_client(app):
             app.send_message("Encrypted message sent to the server.")
     except Exception as e:
         app.send_message(f"Error: {e}")
-
-
-if __name__ == "__main__":
-    start_client()

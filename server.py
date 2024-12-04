@@ -30,13 +30,11 @@ def handle_client(conn, addr, app):
         decryptor = PKCS1_OAEP.new(keyPair)
         decrypted_message = decryptor.decrypt(encrypted_message)
         app.send_message(f"Decrypted message from {addr}: {decrypted_message.decode()}")
-
     except Exception as e:
         app.send_message(f"Error with {addr}: {e}")
     finally:
         conn.close()
         app.send_message(f"Connection with {addr} closed.")
-
 
 def start_server(app):
     while True:
