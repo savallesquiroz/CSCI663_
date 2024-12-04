@@ -3,7 +3,8 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 import binascii
 import gui
-import threading
+from time import sleep
+import server as s
 
 # Server Configuration
 HOST = '127.0.0.1'
@@ -21,13 +22,28 @@ def start_client(app):
             app.send_message("Received server's public key.")
 
             # Encrypt the message using the server's public key
-            message = app.message_queue.get(0).encode()
-            encryptor = PKCS1_OAEP.new(server_public_key)
-            encrypted_message = encryptor.encrypt(message)
-            app.send_message(f"Encrypted message:{binascii.hexlify(encrypted_message)}")
+            while True:
+                message = handle_messages(app).encode()
 
-            # Send the encrypted message to the server
-            client_socket.sendall(encrypted_message)
-            app.send_message("Encrypted message sent to the server.")
+                if s.killthread:
+                    break
+
+                encryptor = PKCS1_OAEP.new(server_public_key)
+                encrypted_message = encryptor.encrypt(message)
+                app.send_message(f"Encrypted message:{binascii.hexlify(encrypted_message)}")
+
+                # Send the encrypted message to the server
+                client_socket.sendall(encrypted_message)
+                app.send_message("Encrypted message sent to the server.")
+
     except Exception as e:
         app.send_message(f"Error: {e}")
+
+def handle_messages(app):
+    message = None
+    while message == None:
+        message = app.message_queue.get() if app.message_queue.qsize() > 0 else None
+        if s.killthread:
+            break
+        sleep(1)
+    return message

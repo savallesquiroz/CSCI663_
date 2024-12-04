@@ -1,6 +1,7 @@
 import sys
-import tkinter as tk
+import server as s
 import queue
+import tkinter as tk
 from tkinter import scrolledtext, messagebox
 
 class CryptoGUI:
@@ -26,7 +27,7 @@ class CryptoGUI:
         )
         self.message_area.pack(padx=10, pady=5, fill="both")
 
-        # Message Queue 
+        # Message Queue
         self.message_queue = queue.Queue()
 
         # Buttons Frame
@@ -43,18 +44,21 @@ class CryptoGUI:
             self.message_entry.pack(padx=10, pady=5)
 
             self.encrypt_button = tk.Button(
-                self.button_frame, text="Encrypt", command=self.encrypt_message(),
+                self.button_frame, text="Encrypt", command=self.send_encryption_message,
                 bg="#1ABC9C", fg="#ECF0F1", font=("Helvetica", 12), width=12
             )
-            self.encrypt_button.grid(row=0, column=0, padx=5)
+            self.encrypt_button.grid(row=0, column=2, padx=5)
         elif sys.argv[1] == "server":
-            self.decrypt_button = tk.Button(
-                self.button_frame, text="Decrypt", command=self.decrypt_message(),
+            self.close_button = tk.Button(
+                self.button_frame, text="End Connection", command=self.flip_killthread,
                 bg="#E74C3C", fg="#ECF0F1", font=("Helvetica", 12), width=12
             )
-            self.decrypt_button.grid(row=0, column=1, padx=5)
+            self.close_button.grid(row=0, column=3, padx=5)
         else:
             pass
+
+    def flip_killthread(self):
+        s.killthread = True
 
     def send_message(self, message):
         if not message:
@@ -66,11 +70,7 @@ class CryptoGUI:
         if sys.argv[1] == "client":
             self.message_entry.delete(0, tk.END)
 
-    def encrypt_message(self):
-        message = self.message_entry.get()
+    def send_encryption_message(self):
+        message = self.message_entry.get() if self.message_entry.get() else None
         self.message_queue.put(message)
-        if sys.argv[1] == "client":
-            self.message_entry.delete(0, tk.END)
-
-    def decrypt_message(self):
-        message = self.message_queue.get(0) if not self.message_queue.empty() else None
+        self.message_entry.delete(0, tk.END)
