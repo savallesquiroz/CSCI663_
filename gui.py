@@ -1,5 +1,4 @@
 import sys
-import server as s
 import queue
 import tkinter as tk
 from tkinter import scrolledtext, messagebox
@@ -10,6 +9,7 @@ class CryptoGUI:
         self.root.title("Crypto Project GUI")
         self.root.geometry("500x450")
         self.root.configure(bg="#2C3E50")  # Fondo oscuro
+        self.root.bind("<Return>", lambda event: self.send_encryption_message())
 
         # Title Label
         self.title_label = tk.Label(
@@ -23,7 +23,7 @@ class CryptoGUI:
         )
         self.message_label.pack(anchor="w", padx=10)
         self.message_area = scrolledtext.ScrolledText(
-            root, state='disabled', height=10, bg="#34495E", fg="#ECF0F1", font=("Courier", 10), wrap=tk.WORD
+            root, state='disabled', height=10, bg="#34495E", fg="#ECF0F1", font=("Courier", 12), wrap=tk.WORD
         )
         self.message_area.pack(padx=10, pady=5, fill="both")
 
@@ -39,26 +39,13 @@ class CryptoGUI:
             self.input_label = tk.Label(
                 root, text="Enter your message:", font=("Helvetica", 12), fg="#ECF0F1", bg="#2C3E50"
             )
-            self.input_label.pack(anchor="w", padx=10)
+            self.input_label.pack(anchor="center", padx=10)
             self.message_entry = tk.Entry(root, width=40, font=("Helvetica", 12), bg="#34495E", fg="#ECF0F1")
             self.message_entry.pack(padx=10, pady=5)
-
-            self.encrypt_button = tk.Button(
-                self.button_frame, text="Encrypt", command=self.send_encryption_message,
-                bg="#1ABC9C", fg="#ECF0F1", font=("Helvetica", 12), width=12
+            self.instructions_label = tk.Label(
+                root, text="Press <Enter> to send the message.", font=("Helvetica", 12), fg="#ECF0F1", bg="#2C3E50"
             )
-            self.encrypt_button.grid(row=0, column=2, padx=5)
-        elif sys.argv[1] == "server":
-            self.close_button = tk.Button(
-                self.button_frame, text="End Connection", command=self.flip_killthread,
-                bg="#E74C3C", fg="#ECF0F1", font=("Helvetica", 12), width=12
-            )
-            self.close_button.grid(row=0, column=3, padx=5)
-        else:
-            pass
-
-    def flip_killthread(self):
-        s.killthread = True
+            self.instructions_label.pack(anchor="center", padx=10)
 
     def send_message(self, message):
         if not message:

@@ -1,10 +1,12 @@
 import socket
 from Crypto.Cipher import PKCS1_OAEP
+import aes_encryption as aes
+from Crypto.Random import get_random_bytes
 from Crypto.PublicKey import RSA
 import binascii
 import gui
+import tkinter as tk
 from time import sleep
-import server as s
 
 # Server Configuration
 HOST = '127.0.0.1'
@@ -21,13 +23,12 @@ def start_client(app):
             server_public_key = RSA.importKey(server_public_key_pem)
             app.send_message("Received server's public key.")
 
-            # Encrypt the message using the server's public key
             while True:
-                message = handle_messages(app).encode()
+                # Generate the AES key
+                aes_key = get_random_bytes(16)
 
-                if s.killthread:
-                    break
-
+                # Encrypt the message using the AES key and the server's public key
+                message = str(aes.encrypt(handle_messages(app) + str(aes_key), aes_key)).encode()
                 encryptor = PKCS1_OAEP.new(server_public_key)
                 encrypted_message = encryptor.encrypt(message)
                 app.send_message(f"Encrypted message:{binascii.hexlify(encrypted_message)}")
@@ -35,15 +36,14 @@ def start_client(app):
                 # Send the encrypted message to the server
                 client_socket.sendall(encrypted_message)
                 app.send_message("Encrypted message sent to the server.")
+                app.message_area.yview(tk.END)
 
     except Exception as e:
         app.send_message(f"Error: {e}")
 
 def handle_messages(app):
     message = None
-    while message == None:
-        message = app.message_queue.get() if app.message_queue.qsize() > 0 else None
-        if s.killthread:
-            break
+    while message is None:
+        message = app.message_queue.get_nowait() if not app.message_queue.empty() else None
         sleep(1)
     return message

@@ -1,8 +1,10 @@
 import socket
 import threading
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import AES
 from Crypto.Cipher import PKCS1_OAEP
 import binascii
+import tkinter as tk
 from time import sleep
 import select
 
@@ -16,9 +18,6 @@ privKeyPEM = keyPair.exportKey()
 HOST = '127.0.0.1'
 PORT = 65432
 
-# Kill thread flag
-killthread = False
-
 def handle_client(conn, addr, app):
     try:
         app.send_message(f"Connected by {addr}")
@@ -27,33 +26,24 @@ def handle_client(conn, addr, app):
         conn.sendall(pubKeyPEM)
         app.send_message(f"Public key sent to {addr}.")
 
-        # Receive the encrypted message
         while True:
-            encrypted_message = handle_messages(conn)
-
-            if killthread:
-                break
-
+            # Receive the encrypted message
+            encrypted_message = handle_messages(conn, app)
             app.send_message(f"Encrypted message from {addr}: {binascii.hexlify(encrypted_message)}")
 
-            # Decrypt the message using the server's private key
+            # Decrypt the message using the server's private key and the AES key
             decryptor = PKCS1_OAEP.new(keyPair)
             decrypted_message = decryptor.decrypt(encrypted_message)
             app.send_message(f"Decrypted message from {addr}: {decrypted_message.decode()}")
+            app.message_area.yview(tk.END)
 
     except Exception as e:
         app.send_message(f"Error with {addr}: {e}")
 
-    finally:
-        conn.close()
-        app.send_message(f"Connection with {addr} closed.")
-
-def handle_messages(conn):
+def handle_messages(conn, app):
     message = None
-    while message == None:
+    while message is None:
         message = conn.recv(1024) if select.select([conn], [], [], 1) else None
-        if killthread:
-            return bytes()
         sleep(1)
     return message
 
