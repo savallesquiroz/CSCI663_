@@ -1,11 +1,15 @@
 # INTRODUCTION TO CRYPTOGRAPHY PROJECT
 
-**Goals:**
+## Project Description
 
-- Implement a two-step encryption/decryption algorithm using the following steps:
-  - Step 1: Implement an AES encryption/decryption algorithm using a 128-bit key.
-  - Step 2: Implement an RSA encryption/decryption algorithm for the AES key.
+This project is a simple, GUI-based application that allows users to send messages to one another that are encrypted for security during communication. Using a combination of symmetric and asymmetric encryption (more specifically, the AES cipher and RSA algorithm), the application allows users to send messages to one another that are encrypted and decrypted using a shared key.
 
-- Implement a client-server or client-client model where any message sent back and forth is encrypted as it leaves the sender and decrypted as it arrives at the receiver.
+## Requirements
 
-- Implement a GUI interface for sending these messages.
+The project requires the following libraries to be installed:
+- `PyCryptodome`
+- `Tkinter`
+
+## How to Use
+
+To run the application, simply run the *main.py* file with either "server" or "client" as an argument. The server will need to be running before the client can connect to it. From there, the client can send messages to the server, which will then be decrypted and displayed in the server's window.

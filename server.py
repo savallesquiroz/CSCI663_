@@ -1,9 +1,9 @@
 import socket
 import threading
 from Crypto.PublicKey import RSA
-from Crypto.Cipher import AES
-from Crypto.Cipher import PKCS1_OAEP
 import binascii
+import aes_rsa as aes
+import json
 import tkinter as tk
 from time import sleep
 import select
@@ -28,12 +28,12 @@ def handle_client(conn, addr, app):
 
         while True:
             # Receive the encrypted message
-            encrypted_message = handle_messages(conn, app)
-            app.send_message(f"Encrypted message from {addr}: {binascii.hexlify(encrypted_message)}")
+            encrypted_message, key = json.loads(handle_messages(conn, app).decode())
+            encrypted_message = encrypted_message.encode()
+            key = key.encode()
 
             # Decrypt the message using the server's private key and the AES key
-            decryptor = PKCS1_OAEP.new(keyPair)
-            decrypted_message = decryptor.decrypt(encrypted_message)
+            decrypted_message = aes.decrypt([encrypted_message, key], privKeyPEM)
             app.send_message(f"Decrypted message from {addr}: {decrypted_message.decode()}")
             app.message_area.yview(tk.END)
 

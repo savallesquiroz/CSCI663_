@@ -1,10 +1,7 @@
 import socket
-from Crypto.Cipher import PKCS1_OAEP
-import aes_encryption as aes
-from Crypto.Random import get_random_bytes
 from Crypto.PublicKey import RSA
 import binascii
-import gui
+import aes_rsa as aes
 import tkinter as tk
 from time import sleep
 
@@ -24,13 +21,8 @@ def start_client(app):
             app.send_message("Received server's public key.")
 
             while True:
-                # Generate the AES key
-                aes_key = get_random_bytes(16)
-
-                # Encrypt the message using the AES key and the server's public key
-                message = str(aes.encrypt(handle_messages(app) + str(aes_key), aes_key)).encode()
-                encryptor = PKCS1_OAEP.new(server_public_key)
-                encrypted_message = encryptor.encrypt(message)
+                # Encrypt the message using the server's public key
+                encrypted_message = aes.encrypt(handle_messages(app).encode(), server_public_key.export_key())
                 app.send_message(f"Encrypted message:{binascii.hexlify(encrypted_message)}")
 
                 # Send the encrypted message to the server
